@@ -2,7 +2,7 @@ import re
 import flet as ft
 import requests
 
-from xlink_dl.dl_moodle import download_files
+from xlink_dl.dl_master import download_files
 
 # Variable para almacenar la ruta de la carpeta seleccionada
 selected_path = None  
