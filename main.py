@@ -17,7 +17,7 @@ def main(page: ft.Page):
     page.overlay.append(file_picker)
 
     select_btn = ft.IconButton(
-        icon=ft.Icons.FOLDER_OPEN,
+        icon=ft.icons.FOLDER_OPEN,
         style=ft.ButtonStyle(
             padding=5,
             color="#ffffff",

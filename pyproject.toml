@@ -6,7 +6,7 @@ description = "App para la descarga de archivos"
 authors = [
   {name = "KeimaSenpai", email = "KeimaSenpai@proton.me"}
 ]
-dependencies = ["flet==0.25.0.dev3526"]
+dependencies = ["flet==0.24.1"]
 
 [tool.flet]
 org = "com.bytebloom" # --org
