@@ -1,40 +1,128 @@
 import flet as ft
 
+from views.home import create_home_page
+from views.setting import create_setting_page
+
 def main(page: ft.Page):
+    page.window.width = 390
+    page.window.height = 600
 
-    selected_path = None  # Variable para almacenar la ruta de la carpeta seleccionada
-    path_text = ft.Text("Ruta seleccionada: ", selectable=True)  # Texto para mostrar la ruta seleccionada
+    info_text = ''' 
+XLink creado por KeimaSenpai. El cual permite la descarga de archivos mediante xlink y enlaces estandars. 
+'''
 
-    async def file_picker_result(e: ft.FilePickerResultEvent):
-        nonlocal selected_path
-        if e.path:  # e.path se usa para obtener la ruta seleccionada
-            selected_path = e.path
-            path_text.value = f"Ruta seleccionada: {selected_path}"  # Actualiza el texto con la ruta
-            page.update()  # Actualiza la página para reflejar los cambios
-
-    # Crear el FilePicker para seleccionar carpetas
-    file_picker = ft.FilePicker(on_result=file_picker_result)
-    page.overlay.append(file_picker)
-
-    select_btn = ft.IconButton(
-        icon=ft.icons.FOLDER_OPEN,
-        style=ft.ButtonStyle(
-            padding=5,
-            color="#ffffff",
-            bgcolor="#393941",
-            shape=ft.RoundedRectangleBorder(radius=5),
+    dlg = ft.AlertDialog(
+        title=ft.Text("XLink 1.0.0", size=15),
+        content=ft.Column(
+            spacing=5,
+            controls=[
+                ft.Text(info_text, size=12),
+                ft.Row(
+                    spacing=4,
+                    controls=[
+                        ft.IconButton(
+                            ft.icons.SEND,
+                            style=ft.ButtonStyle(
+                                color="#5B0098",
+                                bgcolor="#0C0C0C",
+                                shape=ft.RoundedRectangleBorder(radius=5),
+                            ),
+                            on_click=lambda _: page.launch_url("https://t.me/+uMnCUP8to8owMjFh"),
+                        )
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                )
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
         ),
-        on_click=lambda _: file_picker.get_directory_path()  # Cambiamos a get_directory_path para seleccionar una carpeta
+        adaptive=True
     )
 
-    contenido = ft.Column(
-        controls=[
-            path_text,  # Agrega el texto que muestra la ruta seleccionada
-            select_btn
-        ],
-        alignment=ft.MainAxisAlignment.CENTER,
-    )
 
-    page.add(contenido)
+    async def route_change(route):
+        page.views.clear()
+        page.views.append(
+            ft.View(
+                "/",
+                [
+                    ft.AppBar(
+                        leading_width=30,
+                        adaptive=True,
+                        title=ft.Text("XLink", weight=ft.FontWeight.BOLD),
+                        center_title=False,
+                        bgcolor=ft.colors.SURFACE_VARIANT,
+                        actions=[
+                            ft.PopupMenuButton(
+                                items=[
+                                    ft.PopupMenuItem(text="Ajustes", on_click=lambda _: page.go("/setting")),
+                                    ft.PopupMenuItem(text=""),
+                                    ft.PopupMenuItem(text="Info", on_click=lambda e: page.open(dlg)),
+                                ],
+                                shape=ft.RoundedRectangleBorder(radius=5),
+                                icon_color='#ffffff'
+                            ),
+                        ]
+                    ),
 
-ft.app(main, assets_dir="assets")
+
+                    ft.Column(
+                        # spacing=0,
+                        controls=[
+                            create_home_page(page),
+                        ],
+                        # alignment=ft.MainAxisAlignment.CENTER,
+                    ),
+
+                    ft.FloatingActionButton(
+                        icon=ft.icons.ADD,
+                        bgcolor=ft.colors.SURFACE_VARIANT,
+                        elevation=30,
+                        shape=ft.RoundedRectangleBorder(radius=50),
+                        # on_click= 
+                    ),
+
+                ],
+                # padding=0,
+            )
+        )
+
+        if page.route == "/setting":
+            page.views.append(
+                ft.View(
+                    "/setting",
+                    [
+                        ft.AppBar(
+                            leading_width=30,
+                            adaptive=True,
+                            title=ft.Text("Ajustes", weight=ft.FontWeight.BOLD),
+                            center_title=False,
+                            bgcolor=ft.colors.SURFACE_VARIANT,
+                            actions=[]
+                        ),
+                        ft.Column(
+                            # spacing=0,
+                            controls=[
+                                create_setting_page(page),
+                            ],
+                            # alignment=ft.MainAxisAlignment.CENTER,
+                        ),
+                    ],
+                    # padding=0,
+                )
+            )
+        page.update()
+
+    async def view_pop(view):
+        page.views.pop()
+        top_view = page.views[-1]
+        await page.go(top_view.route)
+
+    page.on_route_change = route_change
+    page.on_view_pop = view_pop
+    page.go(page.route)
+
+
+
+ft.app(target=main, assets_dir="assets")
+
