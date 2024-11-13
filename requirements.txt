@@ -1,5 +1,3 @@
 flet==0.24.1
-https://pypi.flet.dev/-/ver_Sgt80/aiohttp-3.9.5-1-cp312-cp312-android_24_arm64_v8a.whl#sha256=aa1bc8e6a20bee36f4ed13a43ba2614781bf5ebcec02a9d0a6187568f9be2297
-aiohttp_socks
 requests
 yarl

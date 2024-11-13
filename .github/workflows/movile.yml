@@ -42,12 +42,12 @@ jobs:
     - name: Flet Build APK
       run: |
         flutter config --no-analytics
-        flet build apk --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION --product XLink --org com.bytebloom --template https://github.com/KeimaSenpai/flet-build-template.git --template-ref 0.24.1 
+        flet build apk --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION --product XLink --org com.bytebloom
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4.3.4
       with:
-        name: apk-build-artifact
+        name: apk-flet
         path: build/apk
         if-no-files-found: warn
         overwrite: false
@@ -77,12 +77,70 @@ jobs:
     - name: Flet Build IPA
       run: |
         flutter config --no-analytics
-        flet build ipa --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION --product XLink --template https://github.com/KeimaSenpai/flet-build-template.git --template-ref 0.24.1
+        flet build ipa --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION --product XLink 
 
     - name: Upload IPA Artifact
       uses: actions/upload-artifact@v4.3.4
       with:
-        name: ipa-build-artifact
+        name: XLink
         path: build/ipa
         if-no-files-found: warn
         overwrite: false
+
+  create-release:
+    needs: [build-apk, build-ipa]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }} #GitHub Token
+        with:
+          tag_name: v${{ env.BUILD_VERSION }}
+          release_name: Release v${{ env.BUILD_VERSION }}
+          draft: false
+          prerelease: false
+
+      - name: Zip Artifacts
+        run: |
+          cd artifacts
+          echo "Initial directory structure:"
+          ls -la
+          echo "\nShowing ipa-flet contents:"
+          ls -la XLink/
+          echo "\nShowing complete path structure:"
+          find XLink -type d
+          mv XLink/Runner.xcarchive/Products/Applications XLink/Payload
+          echo "\nDirectory structure after mv:"
+          ls -la XLink/
+          cd XLink
+          zip -r ../XLink.ipa Payload
+          cd ..
+
+
+      - name: List Workspace After Zipping
+        run: |
+          echo "Artifacts Directory After Zipping:"
+          ls -la artifacts/
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ls -la artifacts/
+            artifacts/apk-flet/app-release.apk
+            artifacts/XLink.ipa
+          tag_name: v${{ env.BUILD_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }} #GitHub Token
