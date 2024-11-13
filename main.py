@@ -6,7 +6,6 @@ from xlink_dl.dl_master import download_file
 
 
 def main(page: ft.Page):
-    page.title = "ChunkDL"
     page.window.width = 390
     page.window.height = 600
 
@@ -21,6 +20,10 @@ def main(page: ft.Page):
         if e.path:
             state.selected_path = e.path
             print("Carpeta seleccionada:", state.selected_path)
+            snack_bar = ft.SnackBar(content=ft.Text(state.selected_path))
+            page.overlay.append(snack_bar)
+            snack_bar.open = True
+            page.update()
 
 
 
@@ -51,15 +54,17 @@ def main(page: ft.Page):
 
     def download(e, urls=None):
         if not state.selected_path:
-            page.show_snack_bar(
-                ft.SnackBar(content=ft.Text("Por favor, seleccione una carpeta de destino"))
-            )
+            snack_bar = ft.SnackBar(content=ft.Text("Por favor, seleccione una carpeta de destino"))
+            page.overlay.append(snack_bar)
+            snack_bar.open = True
+            page.update()
             return
 
         if not urls and not url_list.value:
-            page.show_snack_bar(
-                ft.SnackBar(content=ft.Text("Por favor, ingrese una URL"))
-            )
+            snack_bar = ft.SnackBar(content=ft.Text("Por favor, ingrese una URL"))
+            page.overlay.append(snack_bar)
+            snack_bar.open = True
+            page.update()
             return
         
         urls = urls or url_list.value
@@ -89,13 +94,17 @@ def main(page: ft.Page):
                     download_file(urls=urls_des, ruta_dl=state.selected_path, callback=actualizar_progreso)
 
             except requests.exceptions.RequestException as e:
-                page.show_snack_bar(
-                    ft.SnackBar(content=ft.Text(f"Error al conectar con la API: {str(e)}"))
-                )
+                snack_bar = ft.SnackBar(content=ft.Text(f"Error al conectar con la API: {str(e)}"))
+                page.overlay.append(snack_bar)
+                snack_bar.open = True
+                page.update()
+
             except Exception as e:
-                page.show_snack_bar(
-                    ft.SnackBar(content=ft.Text(f"Error durante la descarga: {str(e)}"))
-                )
+                snack_bar = ft.SnackBar(content=ft.Text(f"Error durante la descarga: {str(e)}"))
+                page.overlay.append(snack_bar)
+                snack_bar.open = True
+                page.update()
+
         else:
             # Caso en el que la URL no contiene "https://xlink.cu/"
             for url in urls:
@@ -136,7 +145,7 @@ XLink creado por KeimaSenpai. El cual permite la descarga de archivos mediante x
 '''
 
     dlg = ft.AlertDialog(
-        title=ft.Text("XLink 1.0.0", size=15),
+        title=ft.Text("XLink 1.0.1", size=15),
         content=ft.Column(
             spacing=5,
             height=120,
