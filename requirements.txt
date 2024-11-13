@@ -1,3 +1,0 @@
-flet==0.24.1
-requests
-yarl
